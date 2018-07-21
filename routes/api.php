@@ -16,10 +16,10 @@ use Illuminate\Http\Request;
 Route::group(['prefix' => 'v1', 'namespace' => 'V1'], function ($router) {
 
     // AUTHENTICATION ROUTES
-    Route::group(['middleware' => 'api', 'prefix' => 'auth'], function ($router) {
-        Route::post('login', 'AuthController@login');
-        Route::post('logout', 'AuthController@logout');
-        Route::post('refresh', 'AuthController@refresh');
-        Route::post('me', 'AuthController@me');
+    Route::group(['middleware' => 'api', 'prefix' => 'auth', 'namespace' => 'Auth'], function ($router) {
+        Route::post('login', 'LoginController@login');
+        Route::post('logout', 'LoginController@logout');
+        Route::post('refresh', 'LoginController@refresh');
+        Route::post('me', 'UserController@me');
     });
 });
