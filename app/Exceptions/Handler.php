@@ -66,7 +66,7 @@ class Handler extends ExceptionHandler
     public function render($request, Exception $exception)
     {
         // Handles route not found and model not found.
-        if ($request->wantsJson() && $this->isNotFoundException($exception)) {
+        if ($this->isNotFoundException($exception)) {
             return response()->json([
                 'status' => 'error',
                 'message' => empty($exception->getMessage()) ? 'Page Not Found' : $exception->getMessage(),
@@ -74,22 +74,28 @@ class Handler extends ExceptionHandler
         }
 
         // Customize form validation errors.
-        if ($request->wantsJson() && $exception instanceof ValidationException) {
+        if ($exception instanceof ValidationException) {
             return response()->json([
                 'status' => 'fail',
                 'message' => $exception->errors(),
             ], 422);
         }
 
-        // If error is unknown were gonna return a status 500.
-        if ($request->wantsJson()) {
+        // Authentication Related Errors
+        if ($exception instanceof AuthenticationException) {
             return response()->json([
                 'status' => 'error',
-                'message' => empty($exception->getMessage()) ? 'Internal Server Error' : $exception->getMessage()
-            ], 500);
+                'message' => $exception->getMessage(),
+            ], 403);
         }
 
-        return parent::render($request, $exception);
+        // If error is unknown were gonna return a status 500.
+        return response()->json([
+            'status' => 'error',
+            'message' => empty($exception->getMessage()) ? 'Internal Server Error' : $exception->getMessage()
+        ], 500);
+
+        //return parent::render($request, $exception);
     }
 
     /**
@@ -101,16 +107,13 @@ class Handler extends ExceptionHandler
      */
     protected function unauthenticated($request, AuthenticationException $exception)
     {
-        if ($request->wantsJson()) {
+        $message = empty($exception->getMessage()) ? 'You are not authorized' : $exception->getMessage();
 
-            $message = empty($exception->getMessage()) ? 'You are not authorized' : $exception->getMessage();
+        return response()->json([
+            'status' => 'error',
+            'message' => $message,
+        ], 401);
 
-            return response()->json([
-                'status' => 'error',
-                'message' => $message,
-            ], 401);
-        }
-
-        return redirect()->guest('login');
+        // return redirect()->guest('login');
     }
 }
