@@ -16,7 +16,7 @@ interface AuthServiceInterface {
 
     public function resetEmail($email);
 
-    public function activateEmail($token, $email);
+    public function activateEmail($token);
 
     public function getCurrentUser();
 

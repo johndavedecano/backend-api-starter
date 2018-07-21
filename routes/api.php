@@ -26,5 +26,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'V1'], function ($router) {
         Route::post('activate', 'RegistrationController@activate');
         Route::post('resend', 'RegistrationController@resend');
         Route::post('me', 'UserController@me');
+        Route::post('email', 'EmailController@update');
+        Route::post('email/activate', 'EmailController@activate');
     });
 });

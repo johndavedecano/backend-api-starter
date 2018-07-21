@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Support\Facades\Password;
 use Carbon\Carbon;
+use App\Models\CustomNotifiable;
 
 /**
  * AuthService - Handles all logics for authentication domain.
@@ -210,6 +211,10 @@ class AuthService implements AuthServiceInterface
             throw new AuthenticationException('User is already activated.');
         }
 
+        if (!$user->activation_token_expires_at) {
+            throw new AuthenticationException('Invalid token expiration date.');
+        }
+
         if (!$user->activation_token_expires_at->isFuture()) {
             throw new AuthenticationException('Token is already expired.');
         }
@@ -230,19 +235,53 @@ class AuthService implements AuthServiceInterface
      */
     public function resetEmail($email)
     {
+        $user = $this->getCurrentUser();
 
+        if (!$user) {
+            throw new AuthenticationException('Invalid user credentials');
+        }
+
+        $token = Password::getRepository()->createNewToken();
+
+        $this->userRepo->update([
+            'email_reset' => $email,
+            'email_reset_token' => $token,
+            'email_reset_expires_at' => Carbon::now()->addHour(24)
+        ], $user->id);
+
+        $notifiable = new CustomNotifiable($email);
+        $notifiable->sendUpdateEmailNotification($token);
+
+        return $user;
     }
 
     /**
      * Updates user email once token is validated.
      *
      * @param string $token
-     * @param string $email
-     * @return void
+     * 
+     * @return object
      */
-    public function activateEmail($token, $email)
+    public function activateEmail($token)
     {
+        $user = $this->userRepo->findBy('email_reset_token', $token);
 
+        if (
+            $user && 
+            $user->email_reset_expires_at &&
+            $user->email_reset &&
+            $user->email_reset_token &&
+            $user->email_reset_expires_at->isFuture()
+        ) {
+            $user->email = $user->email_reset;
+            $user->email_reset = null;
+            $user->email_reset_token = null;
+            $user->email_reset_expires_at = null;
+            $user->save();
+            return $user;
+        }
+
+        throw new AuthenticationException('Invalid email activation token.');
     }
 
     /**

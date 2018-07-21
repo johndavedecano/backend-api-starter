@@ -6,9 +6,6 @@ use App\Models\Traits\JwtSettings;
 use App\Models\Traits\SetsPassword;
 use App\Models\Traits\AuthNotifications;
 
-use App\Notifications\ResetPasswordRequested;
-use App\Notifications\AccountCreated;
-
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Spatie\Permission\Traits\HasRoles;
@@ -32,7 +29,7 @@ class User extends Authenticatable implements JWTSubject
         'updated_at',
         'deleted_at',
         'activation_token_expires_at',
-        'email_reset_token_expires_at'
+        'email_reset_expires_at'
     ];
 
     /**
@@ -53,7 +50,7 @@ class User extends Authenticatable implements JWTSubject
 
         'email_reset',
         'email_reset_token',
-        'email_reset_token_expires_at'
+        'email_reset_expires_at'
     ];
 
     /**
