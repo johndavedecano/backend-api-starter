@@ -6,6 +6,8 @@ use Exception;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Validation\ValidationException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class Handler extends ExceptionHandler
 {
@@ -21,6 +23,7 @@ class Handler extends ExceptionHandler
         \Illuminate\Database\Eloquent\ModelNotFoundException::class,
         \Illuminate\Session\TokenMismatchException::class,
         \Illuminate\Validation\ValidationException::class,
+        \Symfony\Component\HttpKernel\Exception\NotFoundHttpException::class
     ];
 
     /**
@@ -45,6 +48,15 @@ class Handler extends ExceptionHandler
     }
 
     /**
+     * @param Exception $exception
+     * @return boolean
+     */
+    private function isNotFoundException(Exception $exception)
+    {
+        return ($exception instanceof NotFoundHttpException || $exception instanceof ModelNotFoundException);
+    }
+
+    /**
      * Render an exception into an HTTP response.
      *
      * @param  \Illuminate\Http\Request  $request
@@ -53,19 +65,27 @@ class Handler extends ExceptionHandler
      */
     public function render($request, Exception $exception)
     {
-        // If resource not found well return 404.
-        if ($request->wantsJson() && $exception instanceof ModelNotFoundException) {
+        // Handles route not found and model not found.
+        if ($request->wantsJson() && $this->isNotFoundException($exception)) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Model not found'
+                'message' => empty($exception->getMessage()) ? 'Page Not Found' : $exception->getMessage(),
             ], 404);
+        }
+
+        // Customize form validation errors.
+        if ($request->wantsJson() && $exception instanceof ValidationException) {
+            return response()->json([
+                'status' => 'error',
+                'message' => $exception->errors(),
+            ], 422);
         }
 
         // If error is unknown were gonna return a status 500.
         if ($request->wantsJson()) {
             return response()->json([
                 'status' => 'error',
-                'message' => $exception->getMessage()
+                'message' => empty($exception->getMessage()) ? 'Internal Server Error' : $exception->getMessage()
             ], 500);
         }
 
@@ -82,9 +102,12 @@ class Handler extends ExceptionHandler
     protected function unauthenticated($request, AuthenticationException $exception)
     {
         if ($request->wantsJson()) {
+
+            $message = empty($exception->getMessage()) ? 'You are not authorized' : $exception->getMessage();
+
             return response()->json([
                 'status' => 'error',
-                'message' => 'You are not authorized'
+                'message' => $message,
             ], 401);
         }
 

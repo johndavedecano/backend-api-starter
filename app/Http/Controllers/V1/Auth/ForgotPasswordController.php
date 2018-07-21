@@ -2,8 +2,9 @@
 
 use App\Http\Controllers\Controller;
 use App\Services\AuthService;
+use App\Http\Requests\Auth\ForgotPasswordRequest;
 
-class UserController extends Controller
+class ForgotPasswordController extends Controller
 {
     /**
      * @var App\Services\AuthService
@@ -17,23 +18,21 @@ class UserController extends Controller
      */
     public function __construct(AuthService $authService)
     {
-        $this->middleware('auth:api');
-
         $this->authService = $authService;
     }
 
     /**
-     * Get the authenticated User.
+     * Get a JWT via given credentials.
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function me()
+    public function forgot(ForgotPasswordRequest $request)
     {
-        $data = $this->authService->getCurrentUser();
+        $this->authService->forgot($request->get('email'));
 
         return response()->json([
             'status' => 'success',
-            'data' => $data,
+            'message' => 'Password reset instruction was successfully sent to ' . $request->get('email')
         ]);
     }
 }

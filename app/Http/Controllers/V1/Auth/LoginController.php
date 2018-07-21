@@ -1,20 +1,26 @@
-<?php
+<?php namespace App\Http\Controllers\V1\Auth;
 
-namespace App\Http\Controllers\V1\Auth;
-
-use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Controller;
+use App\Services\AuthService;
+use App\Http\Requests\Auth\LoginRequest;
 
 class LoginController extends Controller
 {
+    /**
+     * @var App\Services\AuthService
+     */
+    private $authService;
+
     /**
      * Create a new AuthController instance.
      *
      * @return void
      */
-    public function __construct()
+    public function __construct(AuthService $authService)
     {
         $this->middleware('auth:api', ['except' => ['login']]);
+
+        $this->authService = $authService;
     }
 
     /**
@@ -22,29 +28,14 @@ class LoginController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function login()
+    public function login(LoginRequest $request)
     {
-        $credentials = request(['email', 'password']);
+        $data = $this->authService->login($request->get('email'), $request->get('password'));
 
-        $token = auth()->guard()->attempt($credentials);
-
-        if (!$token = auth()->attempt($credentials)) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Invalid email or password'
-            ], 401);
-        }
-
-        $user = auth()->user();
-
-        if (!$user->is_verified) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Your account is not yet verified'
-            ], 401);
-        }
-
-        return $this->respondWithToken($token);
+        return response()->json([
+            'status' => 'success',
+            'data' => $data
+        ]);
     }
 
     /**
@@ -54,9 +45,11 @@ class LoginController extends Controller
      */
     public function me()
     {
+        $data = $this->authService->getCurrentUser();
+
         return response()->json([
             'status' => 'success',
-            'data' => auth()->user()
+            'data' => $data,
         ]);
     }
 
@@ -67,7 +60,7 @@ class LoginController extends Controller
      */
     public function logout()
     {
-        auth()->logout();
+        $this->authService->logout();
 
         return response()->json([
             'status' => 'success',
@@ -82,25 +75,11 @@ class LoginController extends Controller
      */
     public function refresh()
     {
-        return $this->respondWithToken(auth()->refresh());
-    }
+        $data = $this->authService->refreshToken();
 
-    /**
-     * Get the token array structure.
-     *
-     * @param  string $token
-     *
-     * @return \Illuminate\Http\JsonResponse
-     */
-    protected function respondWithToken($token)
-    {
         return response()->json([
             'status' => 'success',
-            'data' => [
-                'access_token' => $token,
-                'token_type' => 'bearer',
-                'expires_in' => auth()->factory()->getTTL() * 60
-            ]
+            'data' => $data
         ]);
     }
 }

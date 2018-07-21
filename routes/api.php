@@ -20,6 +20,8 @@ Route::group(['prefix' => 'v1', 'namespace' => 'V1'], function ($router) {
         Route::post('login', 'LoginController@login');
         Route::post('logout', 'LoginController@logout');
         Route::post('refresh', 'LoginController@refresh');
+        Route::post('forgot', 'ForgotPasswordController@forgot');
+        Route::post('reset', 'ResetPasswordController@reset');
         Route::post('me', 'UserController@me');
     });
 });

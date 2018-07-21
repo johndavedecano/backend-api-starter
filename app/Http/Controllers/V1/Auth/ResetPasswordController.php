@@ -2,8 +2,9 @@
 
 use App\Http\Controllers\Controller;
 use App\Services\AuthService;
+use App\Http\Requests\Auth\ResetPasswordRequest;
 
-class UserController extends Controller
+class ResetPasswordController extends Controller
 {
     /**
      * @var App\Services\AuthService
@@ -17,23 +18,23 @@ class UserController extends Controller
      */
     public function __construct(AuthService $authService)
     {
-        $this->middleware('auth:api');
-
         $this->authService = $authService;
     }
 
     /**
-     * Get the authenticated User.
+     * Get a JWT via given credentials.
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function me()
+    public function reset(ResetPasswordRequest $request)
     {
-        $data = $this->authService->getCurrentUser();
+        $data = $this->authService->reset(
+            $request->only(['token', 'email', 'password', 'password_confirmation'])
+        );
 
         return response()->json([
             'status' => 'success',
-            'data' => $data,
+            'message' => 'Password was successfully reset.'
         ]);
     }
 }

@@ -1,6 +1,6 @@
 <?php namespace App\Repositories;
 
-use App\User\Models;
+use App\Models\User;
 use Bosnadev\Repositories\Contracts\RepositoryInterface;
 use Bosnadev\Repositories\Eloquent\Repository;
 use App\Repositories\Traits\FindOrFail;
