@@ -16,9 +16,10 @@ class UsersTableSeeder extends Seeder
 
         User::create([
             'id' => 1,
-            'name' => 'John Dave Decano',
+            'first_name' => 'John Dave',
+            'last_name' => 'Decano',
             'email' => 'johndave.decano@qualitytrade.com',
-            'is_verified' => true,
+            'is_activated' => true,
             'password' => 'password'
         ]);
 

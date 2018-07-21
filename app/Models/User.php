@@ -1,10 +1,10 @@
-<?php
+<?php namespace App\Models;
 
-namespace App\Models;
-
+use Hash;
 use App\Models\Traits\JwtSettings;
 use App\Models\Traits\SetsPassword;
 use App\Notifications\ResetPasswordRequested;
+use App\Notifications\AccountCreated;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Spatie\Permission\Traits\HasRoles;
@@ -18,12 +18,37 @@ class User extends Authenticatable implements JWTSubject
     use HasRoles;
 
     /**
+     * The attributes that should be mutated to dates.
+     *
+     * @var array
+     */
+    protected $dates = [
+        'created_at',
+        'updated_at',
+        'deleted_at',
+        'activation_token_expires_at',
+        'email_reset_token_expires_at'
+    ];
+
+    /**
      * The attributes that are mass assignable.
      *
      * @var array
      */
     protected $fillable = [
-        'name', 'email', 'password',
+        'first_name',
+        'last_name',
+
+        'email',
+        'password',
+
+        'is_activated',
+        'activation_token',
+        'activation_token_expires_at',
+
+        'email_reset',
+        'email_reset_token',
+        'email_reset_token_expires_at'
     ];
 
     /**
@@ -36,10 +61,29 @@ class User extends Authenticatable implements JWTSubject
     ];
 
     /**
-     * Send a password reset email to the user
+     * Send activation email to the user
+     */
+    public function sendActivationEmail()
+    {
+        $this->notify(new AccountCreated($this->activation_token));
+    }
+
+    /**
+     * Send a password reset email to the user.
      */
     public function sendPasswordResetNotification($token)
     {
         $this->notify(new ResetPasswordRequested($token));
+    }
+
+    /**
+     * Automatically creates hash for the user password.
+     *
+     * @param  string  $value
+     * @return void
+     */
+    public function setPasswordAttribute($value)
+    {
+        $this->attributes['password'] = Hash::make($value);
     }
 }

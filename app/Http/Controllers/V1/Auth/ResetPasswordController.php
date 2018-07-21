@@ -22,8 +22,6 @@ class ResetPasswordController extends Controller
     }
 
     /**
-     * Get a JWT via given credentials.
-     *
      * @return \Illuminate\Http\JsonResponse
      */
     public function reset(ResetPasswordRequest $request)

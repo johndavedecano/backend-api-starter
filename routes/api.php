@@ -22,6 +22,9 @@ Route::group(['prefix' => 'v1', 'namespace' => 'V1'], function ($router) {
         Route::post('refresh', 'LoginController@refresh');
         Route::post('forgot', 'ForgotPasswordController@forgot');
         Route::post('reset', 'ResetPasswordController@reset');
+        Route::post('register', 'RegistrationController@register');
+        Route::post('activate', 'RegistrationController@activate');
+        Route::post('resend', 'RegistrationController@resend');
         Route::post('me', 'UserController@me');
     });
 });

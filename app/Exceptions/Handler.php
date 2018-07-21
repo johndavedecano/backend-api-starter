@@ -76,7 +76,7 @@ class Handler extends ExceptionHandler
         // Customize form validation errors.
         if ($request->wantsJson() && $exception instanceof ValidationException) {
             return response()->json([
-                'status' => 'error',
+                'status' => 'fail',
                 'message' => $exception->errors(),
             ], 422);
         }

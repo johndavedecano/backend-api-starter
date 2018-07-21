@@ -6,6 +6,7 @@ use App\Services\AuthServiceInterface;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Support\Facades\Password;
+use Carbon\Carbon;
 
 /**
  * AuthService - Handles all logics for authentication domain.
@@ -38,7 +39,7 @@ class AuthService implements AuthServiceInterface
             throw new AuthenticationException('Someone needs to be logged in.');
         }
 
-        if (!$user->is_verified) {
+        if (!$user->is_activated) {
             throw new AuthenticationException('Account is not yet verified.');
         }
 
@@ -62,7 +63,7 @@ class AuthService implements AuthServiceInterface
 
         $user = Auth::guard()->user();
 
-        if (!$user->is_verified) {
+        if (!$user->is_activated) {
             throw new AuthenticationException('Account is not yet verified.');
         }
 
@@ -137,6 +138,7 @@ class AuthService implements AuthServiceInterface
             $credentials,
             function ($user, $password) {
                 $user->password = $password;
+                $user->is_activated = true;
                 $user->save();
             }
         );
@@ -149,25 +151,75 @@ class AuthService implements AuthServiceInterface
     }
 
     /**
+     * Resends user activation email.
+     *
+     * @param string $email
+     * 
+     * @return void
+     */
+    public function resend($email)
+    {
+        $user = $this->userRepo->findBy('email', $email);
+
+        if (!$user) {
+            throw new AuthenticationException('Invalid user credentials');
+        }
+
+        $user->sendActivationEmail();
+
+        return $user;
+    }
+
+    /**
      * Registers a new user account.
      *
      * @param array $credentials
-     * @return void
+     * @return array
      */
     public function register($credentials = [])
     {
+        $user = $this->userRepo->create(array_merge(
+            $credentials,
+            [
+                'is_activated' => false,
+                'activation_token' => Password::getRepository()->createNewToken(),
+                'activation_token_expires_at' => Carbon::now()->addHour(24)
+            ]
+        ));
 
+        $user->sendActivationEmail();
+
+        return $credentials;
     }
 
     /**
      * Activates a user account.
      *
      * @param string $token
-     * @return void
+     * @return object
      */
     public function activate($token)
     {
+        $user = $this->userRepo->findBy('activation_token', $token);
 
+        if (!$user) {
+            throw new AuthenticationException('Invalid activation token.');
+        }
+
+        if ($user->is_activated) {
+            throw new AuthenticationException('User is already activated.');
+        }
+
+        if (!$user->activation_token_expires_at->isFuture()) {
+            throw new AuthenticationException('Token is already expired.');
+        }
+
+        $user->is_activated = true;
+        $user->activation_token = null;
+        $user->activation_token_expires_at = null;
+        $user->save();
+
+        return $user;
     }
 
     /**

@@ -15,11 +15,16 @@ class CreateUsersTable extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('name');
+            $table->string('first_name');
+            $table->string('last_name');
             $table->string('email')->unique();
+            $table->string('email_reset')->nullable();
+            $table->string('email_reset_token')->nullable();
+            $table->dateTime('email_reset_expires_at')->nullable();
             $table->string('password');
-            // Tells if the the user already verified his email.
-            $table->boolean('is_verified')->default(false);
+            $table->string('activation_token')->nullable();
+            $table->dateTime('activation_token_expires_at')->nullable();
+            $table->boolean('is_activated')->default(false);
             $table->rememberToken();
             $table->timestamps();
         });
