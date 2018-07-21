@@ -1,10 +1,14 @@
 <?php namespace App\Models;
 
 use Hash;
+
 use App\Models\Traits\JwtSettings;
 use App\Models\Traits\SetsPassword;
+use App\Models\Traits\AuthNotifications;
+
 use App\Notifications\ResetPasswordRequested;
 use App\Notifications\AccountCreated;
+
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Spatie\Permission\Traits\HasRoles;
@@ -16,6 +20,7 @@ class User extends Authenticatable implements JWTSubject
     use JwtSettings;
     use SetsPassword;
     use HasRoles;
+    use AuthNotifications;
 
     /**
      * The attributes that should be mutated to dates.
@@ -59,31 +64,4 @@ class User extends Authenticatable implements JWTSubject
     protected $hidden = [
         'password', 'remember_token',
     ];
-
-    /**
-     * Send activation email to the user
-     */
-    public function sendActivationEmail()
-    {
-        $this->notify(new AccountCreated($this->activation_token));
-    }
-
-    /**
-     * Send a password reset email to the user.
-     */
-    public function sendPasswordResetNotification($token)
-    {
-        $this->notify(new ResetPasswordRequested($token));
-    }
-
-    /**
-     * Automatically creates hash for the user password.
-     *
-     * @param  string  $value
-     * @return void
-     */
-    public function setPasswordAttribute($value)
-    {
-        $this->attributes['password'] = Hash::make($value);
-    }
 }

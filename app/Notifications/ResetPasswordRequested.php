@@ -45,7 +45,6 @@ class ResetPasswordRequested extends Notification
         return (new MailMessage)
             ->subject("Reset your password")
             ->line("Hey, did you forget your password? Click the button to reset it.")
-            ->action('Reset Password', config('app.spa_url').'/reset?token='.$this->token.'&email='.$notifiable->email)
-            ->line('Best Regards');
+            ->action('Reset Password', config('app.spa_url') . '/reset?token=' . $this->token . '&email=' . $notifiable->email);
     }
 }

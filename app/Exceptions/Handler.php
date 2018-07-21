@@ -65,6 +65,7 @@ class Handler extends ExceptionHandler
      */
     public function render($request, Exception $exception)
     {
+        dd($exception);
         // Handles route not found and model not found.
         if ($request->wantsJson() && $this->isNotFoundException($exception)) {
             return response()->json([
