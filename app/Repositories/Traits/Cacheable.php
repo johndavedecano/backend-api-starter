@@ -11,11 +11,11 @@ trait Cacheable
      * Cache given query
      *
      * @param string $key
-     * @param integer $time
      * @param Illuminate\Database\Eloquent\Collection|Illuminate\Database\Eloquent\Model $query
+     * @param integer $time
      * @return Illuminate\Database\Eloquent\Collection|Illuminate\Database\Eloquent\Model
      */
-    public function cache($key, $time = 60, $query)
+    public function cache($key, $query, $time = 60)
     {
         return Cache::remember($key, $time, function () use ($query) {
             return $query;
