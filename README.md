@@ -55,11 +55,17 @@ have to decouple our applications into different reasonable layers such as follo
 
 ### Unit Testing
 
+Laravel is built with testing in mind. In fact, support for testing with PHPUnit is included out of the box and a phpunit.xml file is already set up for your application. The framework also ships with convenient helper methods that allow you to expressively test your applications
+
+[Read More](https://laravel.com/docs/5.6/testing#introduction)
+
 ```
 $ ./vendor/bin/phpunit --testdox
 ```
 
 ### Code Standards
+
+Like laravel, this follows the PSR-2 coding standard and the PSR-4 autoloading standard.
 
 ```
 $ ./vendor/bin/phpcs
