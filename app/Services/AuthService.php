@@ -130,7 +130,7 @@ class AuthService implements AuthServiceInterface
      * Resets user password.
      *
      * @param array $credentials
-     * 
+     *
      * @return void
      */
     public function reset($credentials = [])
@@ -155,7 +155,7 @@ class AuthService implements AuthServiceInterface
      * Resends user activation email.
      *
      * @param string $email
-     * 
+     *
      * @return void
      */
     public function resend($email)
@@ -259,15 +259,14 @@ class AuthService implements AuthServiceInterface
      * Updates user email once token is validated.
      *
      * @param string $token
-     * 
+     *
      * @return object
      */
     public function activateEmail($token)
     {
         $user = $this->userRepo->findBy('email_reset_token', $token);
 
-        if (
-            $user && 
+        if ($user &&
             $user->email_reset_expires_at &&
             $user->email_reset &&
             $user->email_reset_token &&

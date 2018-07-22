@@ -1,6 +1,7 @@
 <?php namespace App\Services;
 
-interface AuthServiceInterface {
+interface AuthServiceInterface
+{
 
     public function logout();
 

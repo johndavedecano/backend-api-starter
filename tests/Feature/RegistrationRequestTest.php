@@ -35,7 +35,7 @@ class RegistrationRequestTest extends TestCase
 
     public function testRegistrationBadPassword()
     {
-        $response = $this->post('/api/v1/auth/register',[
+        $response = $this->post('/api/v1/auth/register', [
             'first_name' => 'Dave',
             'last_name' => 'Decano',
             'email' => 'johndavedecano2@gmail.com',

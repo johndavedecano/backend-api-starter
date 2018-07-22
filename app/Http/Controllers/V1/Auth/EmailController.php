@@ -29,7 +29,7 @@ class EmailController extends Controller
      */
     public function update(UpdateEmailRequest $request)
     {
-       $this->authService->resetEmail($request->get('email'));
+        $this->authService->resetEmail($request->get('email'));
 
         return response()->json([
             'status' => 'success',
